@@ -95,7 +95,7 @@ function loadData() {
 function iconButtonStyle(active) {
   return {
     flex: 1,
-    height: 62,
+    height: 56,
     border: "none",
     background: "transparent",
     color: active ? "#2563eb" : "#64748b",
@@ -104,7 +104,7 @@ function iconButtonStyle(active) {
     alignItems: "center",
     justifyContent: "center",
     gap: 4,
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: 700,
     cursor: "pointer",
   };
@@ -146,6 +146,13 @@ export default function App() {
 
   useEffect(() => {
     registerServiceWorker(setMessage);
+  }, []);
+
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    document.body.style.margin = "0";
+    document.body.style.background = "#e2e8f0";
+    document.body.style.overflowX = "hidden";
   }, []);
 
   useEffect(() => {
@@ -404,9 +411,10 @@ export default function App() {
   }
 
   const phoneShell = {
+    width: "100%",
     maxWidth: 430,
     margin: "0 auto",
-    minHeight: "100vh",
+    minHeight: "100dvh",
     background: "linear-gradient(180deg, #eff6ff 0%, #f8fafc 18%, #f8fafc 100%)",
     position: "relative",
     boxSizing: "border-box",
@@ -415,8 +423,8 @@ export default function App() {
   const card = {
     background: "rgba(255,255,255,0.95)",
     backdropFilter: "blur(12px)",
-    borderRadius: 24,
-    padding: 16,
+    borderRadius: 20,
+    padding: 14,
     boxShadow: "0 10px 30px rgba(15, 23, 42, 0.08)",
     border: "1px solid rgba(255,255,255,0.7)",
   };
@@ -424,8 +432,8 @@ export default function App() {
   const fieldLabel = { fontSize: 13, color: "#475569", marginBottom: 6, fontWeight: 700 };
   const inputBase = {
     width: "100%",
-    height: 52,
-    borderRadius: 16,
+    height: 48,
+    borderRadius: 14,
     border: "1px solid #dbeafe",
     background: "#f8fbff",
     padding: "0 14px",
@@ -435,13 +443,21 @@ export default function App() {
   };
 
   return (
-    <div style={{ background: "#e2e8f0", minHeight: "100vh", fontFamily: "Arial, sans-serif" }}>
+    <div
+      style={{
+        background: "#e2e8f0",
+        minHeight: "100dvh",
+        fontFamily: "Arial, sans-serif",
+        width: "100%",
+        overflowX: "hidden",
+      }}
+    >
       <div style={phoneShell}>
-        <div style={{ padding: "16px 16px 110px" }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+        <div style={{ padding: "12px 12px 84px" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12, gap: 10 }}>
             <div>
               <div style={{ fontSize: 12, color: "#64748b", marginBottom: 4 }}>毎日の支出をかんたん管理</div>
-              <div style={{ fontSize: 34, fontWeight: 900, color: "#0f172a", letterSpacing: -1 }}>経費アプリ</div>
+              <div style={{ fontSize: 28, fontWeight: 900, color: "#0f172a", letterSpacing: -1 }}>経費アプリ</div>
             </div>
             <button
               onClick={installApp}
@@ -450,8 +466,8 @@ export default function App() {
                 background: "#0f172a",
                 color: "white",
                 borderRadius: 16,
-                height: 44,
-                padding: "0 14px",
+                height: 40,
+                padding: "0 12px",
                 fontWeight: 700,
                 cursor: "pointer",
               }}
@@ -460,12 +476,12 @@ export default function App() {
             </button>
           </div>
 
-          <div style={{ ...card, background: "linear-gradient(135deg, #0f172a 0%, #1d4ed8 100%)", color: "white", marginBottom: 14 }}>
+          <div style={{ ...card, background: "linear-gradient(135deg, #0f172a 0%, #1d4ed8 100%)", color: "white", marginBottom: 12 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
               <div>
                 <div style={{ fontSize: 13, opacity: 0.85 }}>シンプル家計簿</div>
-                <div style={{ fontSize: 26, fontWeight: 800, marginTop: 6 }}>{formatMonthLabel(selectedMonth)}の支出</div>
-                <div style={{ fontSize: 34, fontWeight: 900, marginTop: 8 }}>{formatYen(monthTotal)}</div>
+                <div style={{ fontSize: 22, fontWeight: 800, marginTop: 6 }}>{formatMonthLabel(selectedMonth)}の支出</div>
+                <div style={{ fontSize: 30, fontWeight: 900, marginTop: 8 }}>{formatYen(monthTotal)}</div>
               </div>
               <div style={{ fontSize: 28 }}>💳</div>
             </div>
@@ -479,7 +495,7 @@ export default function App() {
                 marginTop: 16,
                 background: "rgba(255,255,255,0.12)",
                 borderRadius: 18,
-                padding: 10,
+                padding: 8,
               }}
             >
               <button
@@ -488,8 +504,8 @@ export default function App() {
                   border: "none",
                   background: "rgba(255,255,255,0.16)",
                   color: "white",
-                  width: 38,
-                  height: 38,
+                  width: 34,
+                  height: 34,
                   borderRadius: 12,
                   fontSize: 18,
                   cursor: "pointer",
@@ -497,7 +513,7 @@ export default function App() {
               >
                 ←
               </button>
-              <div style={{ fontWeight: 800, fontSize: 16 }}>{formatMonthLabel(selectedMonth)}</div>
+              <div style={{ fontWeight: 800, fontSize: 15 }}>{formatMonthLabel(selectedMonth)}</div>
               <button
                 onClick={() => setSelectedMonth((prev) => moveMonth(prev, 1))}
                 style={{
@@ -515,14 +531,14 @@ export default function App() {
               </button>
             </div>
 
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 18 }}>
-              <div style={{ background: "rgba(255,255,255,0.14)", borderRadius: 18, padding: 14 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginTop: 14 }}>
+              <div style={{ background: "rgba(255,255,255,0.14)", borderRadius: 16, padding: 12 }}>
                 <div style={{ fontSize: 12, opacity: 0.8 }}>今日</div>
-                <div style={{ fontSize: 24, fontWeight: 800, marginTop: 6 }}>{formatYen(todayTotal)}</div>
+                <div style={{ fontSize: 22, fontWeight: 800, marginTop: 6 }}>{formatYen(todayTotal)}</div>
               </div>
               <div style={{ background: "rgba(255,255,255,0.14)", borderRadius: 18, padding: 14 }}>
                 <div style={{ fontSize: 12, opacity: 0.8 }}>月の件数</div>
-                <div style={{ fontSize: 24, fontWeight: 800, marginTop: 6 }}>{monthEntries.length}件</div>
+                <div style={{ fontSize: 22, fontWeight: 800, marginTop: 6 }}>{monthEntries.length}件</div>
               </div>
             </div>
           </div>
@@ -936,9 +952,10 @@ export default function App() {
               background: "rgba(255,255,255,0.9)",
               backdropFilter: "blur(14px)",
               borderTop: "1px solid #dbeafe",
-              boxShadow: "0 -8px 30px rgba(15, 23, 42, 0.08)",
+              boxShadow: "0 -6px 20px rgba(15, 23, 42, 0.08)",
               display: "flex",
-              paddingBottom: "env(safe-area-inset-bottom)",
+              minHeight: 64,
+              paddingBottom: "max(env(safe-area-inset-bottom), 6px)",
               pointerEvents: "auto",
             }}
           >
