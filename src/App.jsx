@@ -40,6 +40,39 @@ function formatYen(value) {
   return `¥${Number(value || 0).toLocaleString("ja-JP")}`;
 }
 
+function downloadTextFile(filename, content, mimeType = "application/json") {
+  const blob = new Blob([content], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+function sanitizeImportedData(data) {
+  const nextCategories = Array.isArray(data?.categories)
+    ? data.categories.filter((item) => typeof item === "string" && item.trim())
+    : DEFAULT_CATEGORIES;
+
+  const nextEntries = Array.isArray(data?.entries)
+    ? data.entries
+        .map((item) => ({
+          id: Number(item?.id) || Date.now() + Math.random(),
+          date: typeof item?.date === "string" ? item.date : getToday(),
+          category: typeof item?.category === "string" ? item.category : "その他",
+          amount: Number(item?.amount) || 0,
+          note: typeof item?.note === "string" ? item.note : "",
+        }))
+        .filter((item) => item.amount > 0)
+    : [];
+
+  return {
+    categories: nextCategories.length > 0 ? [...new Set(nextCategories)] : DEFAULT_CATEGORIES,
+    entries: nextEntries,
+  };
+}
+
 function loadData() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
@@ -92,6 +125,7 @@ export default function App() {
   const [isOffline, setIsOffline] = useState(
     typeof navigator !== "undefined" ? !navigator.onLine : false
   );
+  const [shareText, setShareText] = useState("");
 
   const [form, setForm] = useState({
     date: getToday(),
@@ -257,6 +291,88 @@ export default function App() {
       setForm((p) => ({ ...p, category: next[0] }));
     }
     setMessage("カテゴリを削除しました。");
+  }
+
+  function exportData() {
+    const payload = {
+      app: "経費アプリ",
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      categories,
+      entries,
+    };
+    const stamp = new Date().toISOString().slice(0, 10);
+    downloadTextFile(`expense-data-${stamp}.json`, JSON.stringify(payload, null, 2));
+    setMessage("データを書き出しました。");
+  }
+
+  async function shareData() {
+    const payload = {
+      app: "経費アプリ",
+      version: 1,
+      exportedAt: new Date().toISOString(),
+      categories,
+      entries,
+    };
+    const text = JSON.stringify(payload, null, 2);
+
+    if (typeof navigator !== "undefined" && navigator.share) {
+      try {
+        const file = new File([text], `expense-data-${getToday()}.json`, {
+          type: "application/json",
+        });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            title: "経費アプリのデータ共有",
+            text: "経費アプリのデータです。",
+            files: [file],
+          });
+        } else {
+          await navigator.share({
+            title: "経費アプリのデータ共有",
+            text,
+          });
+        }
+        setMessage("共有シートを開きました。");
+        return;
+      } catch {
+        // fall through
+      }
+    }
+
+    if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+      setShareText(text);
+      setMessage("共有データをコピーしました。相手に貼り付けて送れます。");
+      return;
+    }
+
+    setShareText(text);
+    setMessage("共有データを表示しました。コピーして送ってください。");
+  }
+
+  async function importData(event) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+      const parsed = JSON.parse(text);
+      const next = sanitizeImportedData(parsed);
+      setCategories(next.categories);
+      setEntries(next.entries);
+      setForm((prev) => ({
+        ...prev,
+        category: next.categories[0] || "その他",
+      }));
+      setSelectedMonth(getCurrentMonth());
+      setShareText("");
+      setMessage("共有データを取り込みました。");
+    } catch {
+      setMessage("取り込みに失敗しました。JSONファイルを確認してください。");
+    }
+
+    event.target.value = "";
   }
 
   async function installApp() {
@@ -697,6 +813,89 @@ export default function App() {
               </div>
 
               <div style={card}>
+                <div style={{ fontSize: 20, fontWeight: 800, color: "#0f172a", marginBottom: 14 }}>データ共有</div>
+
+                <div style={{ display: "grid", gap: 10 }}>
+                  <button
+                    onClick={exportData}
+                    style={{
+                      width: "100%",
+                      height: 50,
+                      borderRadius: 16,
+                      border: "none",
+                      background: "#0f172a",
+                      color: "white",
+                      fontSize: 16,
+                      fontWeight: 800,
+                      cursor: "pointer",
+                    }}
+                  >
+                    JSONを書き出す
+                  </button>
+
+                  <button
+                    onClick={shareData}
+                    style={{
+                      width: "100%",
+                      height: 50,
+                      borderRadius: 16,
+                      border: "1px solid #bfdbfe",
+                      background: "#eff6ff",
+                      color: "#1d4ed8",
+                      fontSize: 16,
+                      fontWeight: 800,
+                      cursor: "pointer",
+                    }}
+                  >
+                    データを共有する
+                  </button>
+
+                  <label
+                    style={{
+                      width: "100%",
+                      height: 50,
+                      borderRadius: 16,
+                      border: "1px dashed #94a3b8",
+                      background: "#f8fafc",
+                      color: "#334155",
+                      fontSize: 16,
+                      fontWeight: 800,
+                      cursor: "pointer",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    JSONを取り込む
+                    <input type="file" accept="application/json,.json" onChange={importData} style={{ display: "none" }} />
+                  </label>
+                </div>
+
+                <div style={{ marginTop: 12, fontSize: 12, color: "#64748b", lineHeight: 1.6 }}>
+                  家族や他の端末に渡す時は「JSONを書き出す」か「データを共有する」を使ってください。
+                </div>
+
+                {shareText ? (
+                  <textarea
+                    readOnly
+                    value={shareText}
+                    style={{
+                      width: "100%",
+                      minHeight: 140,
+                      marginTop: 12,
+                      borderRadius: 16,
+                      border: "1px solid #dbeafe",
+                      background: "#f8fbff",
+                      padding: 12,
+                      boxSizing: "border-box",
+                      fontSize: 12,
+                      color: "#334155",
+                    }}
+                  />
+                ) : null}
+              </div>
+
+              <div style={card}>
                 <div style={{ fontSize: 20, fontWeight: 800, color: "#0f172a", marginBottom: 14 }}>データ管理</div>
                 <button
                   onClick={resetAll}
@@ -784,3 +983,4 @@ console.assert(
 );
 console.assert(formatMonthLabel("2026-03") === "2026年3月", "month label should format correctly");
 console.assert(moveMonth("2026-01", -1) === "2025-12", "moveMonth should cross year boundary");
+console.assert(sanitizeImportedData({ categories: ["食費"], entries: [{ amount: 1200, category: "食費", date: "2026-03-01" }] }).entries.length === 1, "import sanitizer should keep valid entry");
