@@ -1,0 +1,6 @@
+{
+  "name": "シンプル家計簿",
+  "short_name": "家計簿",
+  "start_url": "/",
+  "display": "standalone"
+}
