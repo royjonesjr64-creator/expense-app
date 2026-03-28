@@ -21,6 +21,21 @@ function getToday() {
   return new Date().toISOString().slice(0, 10);
 }
 
+function getCurrentMonth() {
+  return getToday().slice(0, 7);
+}
+
+function formatMonthLabel(month) {
+  const [year, mon] = month.split("-");
+  return `${year}年${Number(mon)}月`;
+}
+
+function moveMonth(month, diff) {
+  const [year, mon] = month.split("-").map(Number);
+  const date = new Date(year, mon - 1 + diff, 1);
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+}
+
 function formatYen(value) {
   return `¥${Number(value || 0).toLocaleString("ja-JP")}`;
 }
@@ -73,6 +88,7 @@ export default function App() {
   const [editingCategory, setEditingCategory] = useState("");
   const [editingValue, setEditingValue] = useState("");
   const [deferredPrompt, setDeferredPrompt] = useState(null);
+  const [selectedMonth, setSelectedMonth] = useState(getCurrentMonth());
   const [isOffline, setIsOffline] = useState(
     typeof navigator !== "undefined" ? !navigator.onLine : false
   );
@@ -121,7 +137,7 @@ export default function App() {
   }, []);
 
   const todayText = getToday();
-  const currentMonth = todayText.slice(0, 7);
+  const currentMonth = selectedMonth;
 
   const todayEntries = useMemo(
     () => entries.filter((item) => item.date === todayText),
@@ -141,7 +157,10 @@ export default function App() {
     [monthEntries]
   );
 
-  const recentEntries = useMemo(() => entries.slice(0, 8), [entries]);
+  const recentEntries = useMemo(
+    () => monthEntries.slice().sort((a, b) => String(b.date).localeCompare(String(a.date))).slice(0, 8),
+    [monthEntries]
+  );
 
   const categoryTotals = useMemo(() => {
     return categories
@@ -329,10 +348,55 @@ export default function App() {
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
               <div>
                 <div style={{ fontSize: 13, opacity: 0.85 }}>シンプル家計簿</div>
-                <div style={{ fontSize: 26, fontWeight: 800, marginTop: 6 }}>今月の支出</div>
+                <div style={{ fontSize: 26, fontWeight: 800, marginTop: 6 }}>{formatMonthLabel(selectedMonth)}の支出</div>
                 <div style={{ fontSize: 34, fontWeight: 900, marginTop: 8 }}>{formatYen(monthTotal)}</div>
               </div>
               <div style={{ fontSize: 28 }}>💳</div>
+            </div>
+
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 10,
+                marginTop: 16,
+                background: "rgba(255,255,255,0.12)",
+                borderRadius: 18,
+                padding: 10,
+              }}
+            >
+              <button
+                onClick={() => setSelectedMonth((prev) => moveMonth(prev, -1))}
+                style={{
+                  border: "none",
+                  background: "rgba(255,255,255,0.16)",
+                  color: "white",
+                  width: 38,
+                  height: 38,
+                  borderRadius: 12,
+                  fontSize: 18,
+                  cursor: "pointer",
+                }}
+              >
+                ←
+              </button>
+              <div style={{ fontWeight: 800, fontSize: 16 }}>{formatMonthLabel(selectedMonth)}</div>
+              <button
+                onClick={() => setSelectedMonth((prev) => moveMonth(prev, 1))}
+                style={{
+                  border: "none",
+                  background: "rgba(255,255,255,0.16)",
+                  color: "white",
+                  width: 38,
+                  height: 38,
+                  borderRadius: 12,
+                  fontSize: 18,
+                  cursor: "pointer",
+                }}
+              >
+                →
+              </button>
             </div>
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 18 }}>
@@ -341,8 +405,8 @@ export default function App() {
                 <div style={{ fontSize: 24, fontWeight: 800, marginTop: 6 }}>{formatYen(todayTotal)}</div>
               </div>
               <div style={{ background: "rgba(255,255,255,0.14)", borderRadius: 18, padding: 14 }}>
-                <div style={{ fontSize: 12, opacity: 0.8 }}>件数</div>
-                <div style={{ fontSize: 24, fontWeight: 800, marginTop: 6 }}>{entries.length}件</div>
+                <div style={{ fontSize: 12, opacity: 0.8 }}>月の件数</div>
+                <div style={{ fontSize: 24, fontWeight: 800, marginTop: 6 }}>{monthEntries.length}件</div>
               </div>
             </div>
           </div>
@@ -435,12 +499,12 @@ export default function App() {
           {tab === "history" && (
             <div style={{ ...card, marginBottom: 14 }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
-                <div style={{ fontSize: 20, fontWeight: 800, color: "#0f172a" }}>最近の履歴</div>
-                <div style={{ fontSize: 12, color: "#64748b", fontWeight: 700 }}>{entries.length}件</div>
+                <div style={{ fontSize: 20, fontWeight: 800, color: "#0f172a" }}>{formatMonthLabel(selectedMonth)}の履歴</div>
+                <div style={{ fontSize: 12, color: "#64748b", fontWeight: 700 }}>{monthEntries.length}件</div>
               </div>
 
               {recentEntries.length === 0 ? (
-                <div style={{ color: "#64748b", fontSize: 14 }}>まだデータがありません。</div>
+                <div style={{ color: "#64748b", fontSize: 14 }}>{formatMonthLabel(selectedMonth)}のデータがありません。</div>
               ) : (
                 <div style={{ display: "grid", gap: 10 }}>
                   {recentEntries.map((e) => (
@@ -490,7 +554,7 @@ export default function App() {
           {tab === "summary" && (
             <div style={{ display: "grid", gap: 14 }}>
               <div style={card}>
-                <div style={{ fontSize: 20, fontWeight: 800, color: "#0f172a", marginBottom: 14 }}>カテゴリ別集計</div>
+                <div style={{ fontSize: 20, fontWeight: 800, color: "#0f172a", marginBottom: 14 }}>{formatMonthLabel(selectedMonth)}のカテゴリ別集計</div>
                 {categoryTotals.length === 0 ? (
                   <div style={{ color: "#64748b", fontSize: 14 }}>今月のデータがありません。</div>
                 ) : (
@@ -718,3 +782,5 @@ console.assert(
   typeof registerServiceWorker === "function",
   "service worker helper should exist"
 );
+console.assert(formatMonthLabel("2026-03") === "2026年3月", "month label should format correctly");
+console.assert(moveMonth("2026-01", -1) === "2025-12", "moveMonth should cross year boundary");
