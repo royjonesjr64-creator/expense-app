@@ -411,14 +411,14 @@ export default function App() {
   }
 
   const phoneShell = {
-    width: "100%",
-    maxWidth: 430,
-    margin: "0 auto",
-    minHeight: "100dvh",
-    background: "linear-gradient(180deg, #eff6ff 0%, #f8fafc 18%, #f8fafc 100%)",
-    position: "relative",
-    boxSizing: "border-box",
-  };
+  width: "100%",
+  maxWidth: 390,
+  margin: "0 auto",
+  minHeight: "100dvh",
+  background: "linear-gradient(180deg, #eff6ff 0%, #f8fafc 18%, #f8fafc 100%)",
+  position: "relative",
+  boxSizing: "border-box",
+};
 
   const card = {
     background: "rgba(255,255,255,0.95)",
@@ -453,11 +453,11 @@ export default function App() {
       }}
     >
       <div style={phoneShell}>
-        <div style={{ padding: "12px 12px 84px" }}>
+        <div style={{ padding: "8px 8px 68px" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12, gap: 10 }}>
             <div>
               <div style={{ fontSize: 12, color: "#64748b", marginBottom: 4 }}>毎日の支出をかんたん管理</div>
-              <div style={{ fontSize: 28, fontWeight: 900, color: "#0f172a", letterSpacing: -1 }}>経費アプリ</div>
+              <div style={{ fontSize: 24, fontWeight: 900, color: "#0f172a", letterSpacing: -1 }}>経費アプリ</div>
             </div>
             <button
               onClick={installApp}
@@ -480,8 +480,8 @@ export default function App() {
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12 }}>
               <div>
                 <div style={{ fontSize: 13, opacity: 0.85 }}>シンプル家計簿</div>
-                <div style={{ fontSize: 22, fontWeight: 800, marginTop: 6 }}>{formatMonthLabel(selectedMonth)}の支出</div>
-                <div style={{ fontSize: 30, fontWeight: 900, marginTop: 8 }}>{formatYen(monthTotal)}</div>
+                <div style={{ fontSize: 20, fontWeight: 800, marginTop: 4 }}>{formatMonthLabel(selectedMonth)}の支出</div>
+                <div style={{ fontSize: 26, fontWeight: 900, marginTop: 6 }}>{formatYen(monthTotal)}</div>
               </div>
               <div style={{ fontSize: 28 }}>💳</div>
             </div>
@@ -520,8 +520,8 @@ export default function App() {
                   border: "none",
                   background: "rgba(255,255,255,0.16)",
                   color: "white",
-                  width: 38,
-                  height: 38,
+                  width: 34,
+                  height: 34,
                   borderRadius: 12,
                   fontSize: 18,
                   cursor: "pointer",
@@ -536,7 +536,7 @@ export default function App() {
                 <div style={{ fontSize: 12, opacity: 0.8 }}>今日</div>
                 <div style={{ fontSize: 22, fontWeight: 800, marginTop: 6 }}>{formatYen(todayTotal)}</div>
               </div>
-              <div style={{ background: "rgba(255,255,255,0.14)", borderRadius: 18, padding: 14 }}>
+              <div style={{ background: "rgba(255,255,255,0.14)", borderRadius: 16, padding: 12 }}>
                 <div style={{ fontSize: 12, opacity: 0.8 }}>月の件数</div>
                 <div style={{ fontSize: 22, fontWeight: 800, marginTop: 6 }}>{monthEntries.length}件</div>
               </div>
@@ -938,8 +938,9 @@ export default function App() {
           style={{
             position: "fixed",
             bottom: 0,
-            left: 0,
-            right: 0,
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: "100%",
             display: "flex",
             justifyContent: "center",
             pointerEvents: "none",
@@ -948,14 +949,14 @@ export default function App() {
           <div
             style={{
               width: "100%",
-              maxWidth: 430,
+              maxWidth: 390,
               background: "rgba(255,255,255,0.9)",
               backdropFilter: "blur(14px)",
               borderTop: "1px solid #dbeafe",
               boxShadow: "0 -6px 20px rgba(15, 23, 42, 0.08)",
               display: "flex",
-              minHeight: 64,
-              paddingBottom: "max(env(safe-area-inset-bottom), 6px)",
+              minHeight: 56,
+              paddingBottom: "max(env(safe-area-inset-bottom), 2px)",
               pointerEvents: "auto",
             }}
           >
